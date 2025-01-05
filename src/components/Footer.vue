@@ -23,6 +23,6 @@ footer {
   text-align: center;
   color: #94a3b8;
   font-family: "ui-monospace", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace";
-  margin-bottom: 2px;
+  margin: 4px 0;
 }
 </style>

@@ -52,16 +52,24 @@ export interface RatingChange {
 }
 
 const queue = new PQueue({ concurrency: 1, interval: 1000 });
-const ratingCache = createStorage<RatingChange[]>({
+const ratingCache = createStorage<{
+  expiresAt: number
+  data: RatingChange[]
+}>({
   driver: IDBDriver({
     dbName: 'rating',
     storeName: 'history',
   }),
 });
 
+const CACHE_EXPIRY = 2 * 60 * 60 * 1000; // 2 hours
+
 export async function fetchRatingChanges(handle: string, retry: number, cache = true): Promise<RatingChange[]> {
-  if (cache && await ratingCache.has(handle))
-    return (await ratingCache.get(handle))!;
+  if (cache && await ratingCache.has(handle)) {
+    const cached = (await ratingCache.get(handle))!;
+    if (cached.expiresAt > Date.now())
+      return cached.data;
+  }
 
   return queue.add(async () => {
     const url = new URL('https://codeforces.com/api/user.rating');
@@ -75,7 +83,10 @@ export async function fetchRatingChanges(handle: string, retry: number, cache = 
     const data = await res.json();
     if (data.status !== 'OK')
       throw new Error(data.comment);
-    ratingCache.setItemRaw(handle, data.result);
+    ratingCache.setItemRaw(handle, {
+      expiresAt: Date.now() + CACHE_EXPIRY,
+      data: data.result,
+    });
     return data.result;
   });
 }

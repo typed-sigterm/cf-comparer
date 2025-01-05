@@ -3,33 +3,58 @@ import type { RatingChange } from '@/data';
 import RatingHistory from '@/components/RatingHistory.vue';
 import { fetchRatingChanges } from '@/data';
 import { computed, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
+const router = useRouter();
+const route = useRoute();
+
+const cache = computed(() => route.query.cache !== 'false');
 const handles = computed(() => {
-  const x = useRoute().query.handle;
+  const x = route.query.handle;
   if (typeof x === 'string' && x)
     return [x];
   if (Array.isArray(x))
     return x.filter(Boolean) as string[];
   return [];
 });
-const mode = computed(() => useRoute().query.mode === 'svg' ? 'svg' : 'canvas');
+const mode = computed(() => route.query.mode === 'svg' ? 'svg' : 'canvas');
 
 const data = ref<RatingChange[]>([]);
-const tasks: Promise<unknown>[] = [];
+const tasks: Promise<unknown>[] = ([]);
 const isLoading = ref(false);
 
 watch(handles, async (handles) => {
   isLoading.value = true;
-  tasks.length = 0;
+  data.value.length = tasks.length = 0;
   for (const handle of handles) {
     tasks.push(
-      fetchRatingChanges(handle, 3).then(c => data.value.push(...c)),
+      fetchRatingChanges(handle, 3, cache.value).then(c => data.value.push(...c)),
     );
   }
   await Promise.all(tasks);
   isLoading.value = false;
 }, { immediate: true });
+
+function retry() {
+  router.replace({
+    ...route,
+    query: {
+      ...route.query,
+      cache: 'false',
+    },
+  });
+}
+
+function switchMode() {
+  router.replace({
+    ...route,
+    query: {
+      ...route.query,
+      mode: mode.value === 'svg' ? 'canvas' : 'svg',
+      cache: 'true',
+    },
+  });
+}
 </script>
 
 <template>
@@ -39,11 +64,35 @@ watch(handles, async (handles) => {
       Chart is cooking...
     </p>
   </div>
-  <div v-else class="chart-wrapper">
-    <RatingHistory :mode :data />
+  <template v-else>
+    <div class="operations">
+      <Button :label="`Save image (.${mode === 'svg' ? 'svg' : 'png'})`" severity="contrast">
+        <template #icon>
+          <IconPrimeDownload />
+        </template>
+      </Button>
+      <Button label="Retry without cache" severity="secondary" @click="retry">
+        <template #icon>
+          <IconPrimeRefresh />
+        </template>
+      </Button>
+      <Button
+        :label="`Switch to ${mode === 'svg' ? 'canvas' : 'SVG'} mode`"
+        severity="secondary"
+        @click="switchMode"
+      >
+        <template #icon>
+          <IconPrimeArrowRightArrowLeft />
+        </template>
+      </Button>
+    </div>
     <Divider />
-    <CurrentRating :mode :data />
-  </div>
+    <div>
+      <RatingHistory :mode :data />
+      <Divider />
+      <CurrentRating :mode :data />
+    </div>
+  </template>
 </template>
 
 <style scoped>
@@ -62,5 +111,11 @@ watch(handles, async (handles) => {
   width: 50px;
   height: 50px;
   margin-bottom: 8px;
+}
+
+.operations {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
 }
 </style>

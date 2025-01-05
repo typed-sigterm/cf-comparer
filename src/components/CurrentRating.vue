@@ -3,7 +3,7 @@ import type { RatingChange } from '@/data';
 import type { RenderMode } from '@/utils';
 import { getRenderer } from '@/utils';
 import { Chart } from '@antv/g2';
-import { computed, onMounted, useTemplateRef } from 'vue';
+import { computed, nextTick, onMounted, useTemplateRef } from 'vue';
 
 const props = defineProps<{
   mode: RenderMode
@@ -35,20 +35,20 @@ let chart: Chart | undefined;
 function setupChart() {
   if (!container.value)
     return;
-  if (!chart) {
-    chart = new Chart({
-      container: container.value,
-      renderer: getRenderer(props.mode),
-    });
-    chart.options({
-      autoFit: true,
-      type: 'interval',
-      encode: { x: 'handle', y: 'rating', color: 'type' },
-      axis: { x: { title: 'Handle' }, y: { title: 'Rating' } },
-      transform: [{ type: 'dodgeX' }],
-      coordinate: { transform: [{ type: 'transpose' }] },
-    });
-  }
+  if (chart)
+    chart.destroy();
+  chart = new Chart({
+    container: container.value,
+    renderer: getRenderer(props.mode),
+  });
+  chart.options({
+    autoFit: true,
+    type: 'interval',
+    encode: { x: 'handle', y: 'rating', color: 'type' },
+    axis: { x: { title: 'Handle' }, y: { title: 'Rating' } },
+    transform: [{ type: 'dodgeX' }],
+    coordinate: { transform: [{ type: 'transpose' }] },
+  });
   chart.data(data.value);
   chart.render();
 }
