@@ -5,6 +5,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "prepare": "husky",
     "preview": "vite preview",
     "test:types": "vue-tsc --noEmit"
   },
@@ -31,7 +32,7 @@
     "ofetch": "^1.4.1",
     "p-queue": "^8.0.1",
     "primevue": "^4.2.5",
-    "typescript": "~5.7.2",
+    "typescript": "^5.7.2",
     "unplugin-icons": "^0.22.0",
     "unplugin-vue-components": "^0.28.0",
     "unplugin-vue-router": "^0.10.9",
