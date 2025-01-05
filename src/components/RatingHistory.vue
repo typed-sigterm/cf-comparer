@@ -32,14 +32,14 @@ const data = computed(() => {
 });
 
 let chart: Chart | undefined;
-function setupChart() {
+async function setupChart() {
   if (!container.value)
     return;
   if (chart)
     chart.destroy();
   chart = new Chart({
     container: container.value,
-    renderer: getRenderer(props.mode),
+    renderer: await getRenderer(props.mode),
   });
   chart.options({
     autoFit: true,

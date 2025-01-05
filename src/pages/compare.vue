@@ -2,6 +2,7 @@
 import type { RatingChange } from '@/data';
 import RatingHistory from '@/components/RatingHistory.vue';
 import { fetchRatingChanges } from '@/data';
+import { getRenderer } from '@/utils';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -32,6 +33,7 @@ watch(handles, async (handles) => {
     );
   }
   await Promise.all(tasks);
+  await getRenderer(mode.value); // Prefetch renderer
   isLoading.value = false;
 }, { immediate: true });
 
