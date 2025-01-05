@@ -27,6 +27,8 @@ export default defineConfig({
     pluginIcon(),
   ],
 
+  envPrefix: ['VITE_', 'COMMIT_REF'],
+
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

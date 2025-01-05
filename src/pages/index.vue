@@ -4,7 +4,7 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
-const handles = ref<string[]>(['']);
+const handles = ref<string[]>(['tourist']);
 const disabled = computed(() => {
   return handles.value.length < 1 || handles.value.some(x => !x);
 });
@@ -23,10 +23,10 @@ function compare() {
   <form>
     <InputGroup v-for="(_, i) in handles" :key="i">
       <InputGroupAddon>
-        <img class="cf" :src="codeforcesLogo" alt="Codeforces">
+        <img class="cf-logo" :src="codeforcesLogo" alt="Codeforces">
       </InputGroupAddon>
       <InputText v-model="handles[i]" />
-      <InputGroupAddon v-if="i > 0">
+      <InputGroupAddon v-if="handles.length > 1">
         <Button severity="secondary" @click="handles.splice(i, 1)">
           <template #icon>
             <IconPrimeUserMinus />
@@ -56,14 +56,15 @@ form {
   gap: 8px;
 }
 
-.cf {
+.cf-logo {
   width: 1em;
+  user-select: none;
 }
 
 .submit {
   display: flex;
   gap: 8px;
-  margin-top: 20px;
+  margin-top: 12px;
   width: 500px;
   align-self: center;
 }

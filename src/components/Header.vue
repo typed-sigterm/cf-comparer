@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import logo from '@/assets/logo.svg?url';
+import { GITHUB_URL } from '@/utils';
 import { RouterLink } from 'vue-router';
 </script>
 
@@ -10,7 +11,7 @@ import { RouterLink } from 'vue-router';
       <h1>CF Comparer</h1>
     </RouterLink>
     <div class="right">
-      <a href="https://github.com/typed-sigterm/cf-comparer" target="_blank">
+      <a :href="GITHUB_URL" target="_blank">
         <IconMdiGithub />
       </a>
     </div>
