@@ -7,7 +7,6 @@ import pluginIcon from 'unplugin-icons/vite';
 import pluginComponents from 'unplugin-vue-components/vite';
 import pluginVueRouter from 'unplugin-vue-router/vite';
 import { defineConfig } from 'vite';
-import pluginVueDevTools from 'vite-plugin-vue-devtools';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,7 +15,6 @@ export default defineConfig({
   plugins: [
     pluginVueRouter(),
     pluginVue(),
-    pluginVueDevTools(),
     pluginComponents({
       dts: true,
       resolvers: [

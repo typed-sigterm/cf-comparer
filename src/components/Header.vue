@@ -12,7 +12,7 @@ import { RouterLink } from 'vue-router';
     </RouterLink>
     <div class="right">
       <a :href="GITHUB_URL" target="_blank">
-        <IconMdiGithub />
+        <IconPrimeGithub />
       </a>
     </div>
   </header>
@@ -37,7 +37,7 @@ header > div {
   margin-left: 20px;
 }
 .right {
-  margin-right: 20px;
+  margin-right: 16px;
 }
 
 .logo {
@@ -52,7 +52,7 @@ h1 {
 }
 
 .right svg {
-  font-size: 28px;
+  font-size: 32px;
   vertical-align: bottom;
 }
 </style>
