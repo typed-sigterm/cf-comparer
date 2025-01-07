@@ -8,17 +8,19 @@ const handles = ref<string[]>(['']);
 const disabled = computed(() => {
   return handles.value.length < 1 || handles.value.some(x => !x);
 });
+const isRedirecting = ref(false);
 
 function compare(ev?: Event) {
   ev?.preventDefault();
   if (disabled.value)
     return;
+  isRedirecting.value = true;
   router.push({
     path: '/compare',
     query: {
       handle: handles.value.filter(Boolean),
     },
-  });
+  }).finally(() => isRedirecting.value = false);
 }
 </script>
 
@@ -43,7 +45,14 @@ function compare(ev?: Event) {
       </template>
     </Button>
   </form>
-  <Button class="submit" label="Compare" severity="primary" :disabled @click="compare">
+  <Button
+    class="submit"
+    label="Compare"
+    severity="primary"
+    :loading="isRedirecting"
+    :disabled
+    @click="compare"
+  >
     <template #icon>
       <IconPrimeSend />
     </template>
