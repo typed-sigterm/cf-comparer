@@ -63,8 +63,17 @@ function retry() {
 </script>
 
 <template>
-  <div v-if="isLoading" class="loading-wrapper">
-    <ProgressSpinner class="spin" stroke-width="4" />
+  <div v-if="!handles.length" class="error">
+    <IconPrimeTimesCircle />
+    <h2>
+      400 Bad Request
+    </h2>
+    <p>
+      Please specify at least one handle in the query parameters.
+    </p>
+  </div>
+  <div v-else-if="isLoading" class="loading-wrapper">
+    <ProgressSpinner stroke-width="4" />
     <p>
       Chart is cooking...
     </p>
@@ -97,18 +106,27 @@ function retry() {
 </template>
 
 <style scoped>
-.loading-wrapper {
-  height: 100%;
+.error, .loading-wrapper {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  flex: 1;
   align-items: center;
   justify-content: center;
-  flex: 1;
+}
+
+.error {
+  gap: 4px;
+}
+
+.error svg {
+  font-size: 56px;
+}
+
+.loading-wrapper {
   margin-bottom: 28px;
 }
 
-.spin {
+.loading-wrapper svg {
   width: 50px;
   height: 50px;
   margin-bottom: 8px;
