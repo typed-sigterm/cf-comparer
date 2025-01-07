@@ -9,7 +9,8 @@ const disabled = computed(() => {
   return handles.value.length < 1 || handles.value.some(x => !x);
 });
 
-function compare() {
+function compare(ev?: Event) {
+  ev?.preventDefault();
   if (disabled.value)
     return;
   router.push({
@@ -22,7 +23,7 @@ function compare() {
 </script>
 
 <template>
-  <form @click="compare">
+  <form @submit="compare">
     <InputGroup v-for="(_, i) in handles" :key="i">
       <InputGroupAddon>
         <img class="cf-logo" :src="codeforcesLogo" alt="Codeforces">
