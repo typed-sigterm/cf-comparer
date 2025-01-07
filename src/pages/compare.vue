@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { RatingChange } from '@/data';
+import Error from '@/components/Error.vue';
 import RatingHistory from '@/components/RatingHistory.vue';
 import { fetchRatingChanges } from '@/data';
 import { downloadCanvas } from '@/utils';
@@ -23,18 +24,23 @@ const handles = computed(() => {
 
 const data = ref<RatingChange[]>([]);
 const tasks: Promise<unknown>[] = ([]);
-const isLoading = ref(false);
+const status = ref<'normal' | 'loading' | 'error'>('loading');
 
 watch(handles, async (handles) => {
-  isLoading.value = true;
+  status.value = 'loading';
   data.value.length = tasks.length = 0;
   for (const handle of handles) {
     tasks.push(
       fetchRatingChanges(handle, 3, cache.value).then(c => data.value.push(...c)),
     );
   }
-  await Promise.all(tasks);
-  isLoading.value = false;
+  try {
+    await Promise.all(tasks);
+    status.value = 'normal';
+  } catch (e) {
+    console.error(e);
+    status.value = 'error';
+  }
 }, { immediate: true });
 
 const chartContainer = useTemplateRef('chartContainer');
@@ -70,22 +76,12 @@ function retry() {
 </script>
 
 <template>
-  <div v-if="!handles.length" class="error">
-    <IconPrimeTimesCircle />
-    <h2>
-      400 Bad Request
-    </h2>
-    <p>
-      Please specify at least one handle in the query parameters.
-    </p>
-  </div>
-  <div v-else-if="isLoading" class="loading-wrapper">
-    <ProgressSpinner stroke-width="4" />
-    <p>
-      Chart is cooking...
-    </p>
-  </div>
-  <template v-else>
+  <Error
+    v-if="!handles.length"
+    title="400 Bad Request"
+    details="Please specify at least one handle in the query parameters."
+  />
+  <template v-else-if="status === 'normal'">
     <div class="operations">
       <Button
         label="Save image"
@@ -110,30 +106,30 @@ function retry() {
       <CurrentRating :data />
     </div>
   </template>
+  <div v-else-if="status === 'loading'" class="loading-wrapper">
+    <ProgressSpinner class="spin" stroke-width="4" />
+    <p>
+      Chart is cooking...
+    </p>
+  </div>
+  <Error
+    v-else
+    title="Failed to fetch data"
+    details="Please check F12 console for more information."
+  />
 </template>
 
 <style scoped>
-.error, .loading-wrapper {
+.loading-wrapper {
   display: flex;
   flex-direction: column;
   flex: 1;
   align-items: center;
   justify-content: center;
-}
-
-.error {
-  gap: 4px;
-}
-
-.error svg {
-  font-size: 56px;
-}
-
-.loading-wrapper {
   margin-bottom: 28px;
 }
 
-.loading-wrapper svg {
+.spin {
   width: 50px;
   height: 50px;
   margin-bottom: 8px;
