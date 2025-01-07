@@ -2,6 +2,9 @@
 import logo from '@/assets/logo.svg?url';
 import { GITHUB_URL } from '@/utils';
 import { RouterLink } from 'vue-router';
+
+const build = (import.meta.env.COMMIT_REF ?? 'DEV').slice(0, 7);
+const link = build !== 'DEV' && `${GITHUB_URL}/commit/${build}`;
 </script>
 
 <template>
@@ -11,6 +14,13 @@ import { RouterLink } from 'vue-router';
       <h1>CF Comparer</h1>
     </RouterLink>
     <div class="right">
+      <p class="build">
+        Build
+        <a v-if="link" :href="link" target="_blank">
+          {{ build }}
+        </a>
+        <span v-else>{{ build }}</span>
+      </p>
       <a :href="GITHUB_URL" target="_blank">
         <IconPrimeGithub />
       </a>
@@ -54,5 +64,11 @@ h1 {
 .right svg {
   font-size: 32px;
   vertical-align: bottom;
+}
+
+.build {
+  color: #94a3b8;
+  font-family: "ui-monospace", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace";
+  margin-right: 12px;
 }
 </style>
