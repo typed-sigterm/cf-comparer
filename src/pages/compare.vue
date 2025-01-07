@@ -89,7 +89,7 @@ const now = new Date();
     <div class="operations">
       <Button
         label="Save image"
-        severity="contrast"
+        severity="success"
         :loading="isDownloading"
         @click="saveAsImage"
       >
