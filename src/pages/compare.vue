@@ -3,11 +3,13 @@ import type { RatingChange } from '@/data';
 import RatingHistory from '@/components/RatingHistory.vue';
 import { fetchRatingChanges } from '@/data';
 import { downloadCanvas } from '@/utils';
+import { useToast } from 'primevue/usetoast';
 import { computed, ref, useTemplateRef, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const router = useRouter();
 const route = useRoute();
+const toast = useToast();
 
 const cache = computed(() => route.query.cache !== 'false');
 const handles = computed(() => {
@@ -47,6 +49,11 @@ async function saveAsImage() {
     await downloadCanvas(canvas, 'codeforces-rating.png');
   } catch (e) {
     console.error(e);
+    toast.add({
+      severity: 'error',
+      summary: 'Failed to save image',
+      detail: 'Please check F12 console for more information.',
+    });
   }
   isDownloading.value = false;
 }

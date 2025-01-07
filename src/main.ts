@@ -1,6 +1,7 @@
 import App from '@/App.vue';
 import Aura from '@primevue/themes/aura';
 import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
 import { createApp } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { routes } from 'vue-router/auto-routes';
@@ -17,4 +18,5 @@ createApp(App)
       preset: Aura,
     },
   })
+  .use(ToastService)
   .mount('#app');
