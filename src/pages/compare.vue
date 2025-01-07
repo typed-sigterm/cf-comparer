@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { RatingChange } from '@/data';
+import codeforcesLogo from '@/assets/codeforces.png?url';
 import Error from '@/components/Error.vue';
 import RatingHistory from '@/components/RatingHistory.vue';
 import { fetchRatingChanges } from '@/data';
@@ -73,6 +74,8 @@ function retry() {
     },
   });
 }
+
+const now = new Date();
 </script>
 
 <template>
@@ -81,6 +84,7 @@ function retry() {
     title="400 Bad Request"
     details="Please specify at least one handle in the query parameters."
   />
+
   <template v-else-if="status === 'normal'">
     <div class="operations">
       <Button
@@ -99,19 +103,31 @@ function retry() {
         </template>
       </Button>
     </div>
+
     <Divider />
+
     <div ref="chartContainer">
+      <h2>
+        <img :src="codeforcesLogo">
+        Codeforces Rating Comparison
+      </h2>
       <RatingHistory :data />
-      <Divider />
       <CurrentRating :data />
+      <p class="footnote">
+        Generated at {{ now.toLocaleString() }}
+        <br>
+        by CF Comparer
+      </p>
     </div>
   </template>
+
   <div v-else-if="status === 'loading'" class="loading-wrapper">
     <ProgressSpinner class="spin" stroke-width="4" />
     <p>
       Chart is cooking...
     </p>
   </div>
+
   <Error
     v-else
     title="Failed to fetch data"
@@ -139,5 +155,26 @@ function retry() {
   display: flex;
   gap: 8px;
   justify-content: center;
+}
+
+h2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+h2 img {
+  height: 1em;
+}
+
+.footnote {
+  color: var(--p-button-secondary-color);
+  text-align: right;
+  font-family: "ui-monospace", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace";
+  margin-right: 16px;
+  margin-bottom: 8px;
 }
 </style>
