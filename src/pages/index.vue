@@ -10,6 +10,8 @@ const disabled = computed(() => {
 });
 
 function compare() {
+  if (disabled.value)
+    return;
   router.push({
     path: '/compare',
     query: {
@@ -20,7 +22,7 @@ function compare() {
 </script>
 
 <template>
-  <form>
+  <form @click="compare">
     <InputGroup v-for="(_, i) in handles" :key="i">
       <InputGroupAddon>
         <img class="cf-logo" :src="codeforcesLogo" alt="Codeforces">

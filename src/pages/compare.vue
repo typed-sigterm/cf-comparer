@@ -2,8 +2,8 @@
 import type { RatingChange } from '@/data';
 import RatingHistory from '@/components/RatingHistory.vue';
 import { fetchRatingChanges } from '@/data';
-import { getRenderer } from '@/utils';
-import { computed, ref, watch } from 'vue';
+import { downloadCanvas } from '@/utils';
+import { computed, ref, useTemplateRef, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -18,7 +18,6 @@ const handles = computed(() => {
     return x.filter(Boolean) as string[];
   return [];
 });
-const mode = computed(() => route.query.mode === 'svg' ? 'svg' : 'canvas');
 
 const data = ref<RatingChange[]>([]);
 const tasks: Promise<unknown>[] = ([]);
@@ -33,9 +32,24 @@ watch(handles, async (handles) => {
     );
   }
   await Promise.all(tasks);
-  await getRenderer(mode.value); // Prefetch renderer
   isLoading.value = false;
 }, { immediate: true });
+
+const chartContainer = useTemplateRef('chartContainer');
+const isDownloading = ref(false);
+async function saveAsImage() {
+  if (!chartContainer.value)
+    return;
+  isDownloading.value = true;
+  try {
+    const mod = await import('html2canvas');
+    const canvas = await mod.default(chartContainer.value);
+    await downloadCanvas(canvas, 'codeforces-rating.png');
+  } catch (e) {
+    console.error(e);
+  }
+  isDownloading.value = false;
+}
 
 function retry() {
   router.replace({
@@ -43,17 +57,6 @@ function retry() {
     query: {
       ...route.query,
       cache: 'false',
-    },
-  });
-}
-
-function switchMode() {
-  router.replace({
-    ...route,
-    query: {
-      ...route.query,
-      mode: mode.value === 'svg' ? 'canvas' : 'svg',
-      cache: 'true',
     },
   });
 }
@@ -68,7 +71,12 @@ function switchMode() {
   </div>
   <template v-else>
     <div class="operations">
-      <Button :label="`Save image (.${mode === 'svg' ? 'svg' : 'png'})`" severity="contrast">
+      <Button
+        label="Save image"
+        severity="contrast"
+        :loading="isDownloading"
+        @click="saveAsImage"
+      >
         <template #icon>
           <IconPrimeDownload />
         </template>
@@ -78,21 +86,12 @@ function switchMode() {
           <IconPrimeRefresh />
         </template>
       </Button>
-      <Button
-        :label="`Switch to ${mode === 'svg' ? 'canvas' : 'SVG'} mode`"
-        severity="secondary"
-        @click="switchMode"
-      >
-        <template #icon>
-          <IconPrimeArrowRightArrowLeft />
-        </template>
-      </Button>
     </div>
     <Divider />
-    <div>
-      <RatingHistory :mode :data />
+    <div ref="chartContainer">
+      <RatingHistory :data />
       <Divider />
-      <CurrentRating :mode :data />
+      <CurrentRating :data />
     </div>
   </template>
 </template>

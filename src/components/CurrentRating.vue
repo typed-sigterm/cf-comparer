@@ -1,12 +1,9 @@
 <script lang="ts" setup>
 import type { RatingChange } from '@/data';
-import type { RenderMode } from '@/utils';
-import { getRenderer } from '@/utils';
 import { Chart } from '@antv/g2';
-import { computed, nextTick, onMounted, useTemplateRef } from 'vue';
+import { computed, onMounted, useTemplateRef } from 'vue';
 
 const props = defineProps<{
-  mode: RenderMode
   data: RatingChange[]
 }>();
 
@@ -32,15 +29,12 @@ const data = computed(() => {
 });
 
 let chart: Chart | undefined;
-async function setupChart() {
+function setupChart() {
   if (!container.value)
     return;
   if (chart)
     chart.destroy();
-  chart = new Chart({
-    container: container.value,
-    renderer: await getRenderer(props.mode),
-  });
+  chart = new Chart({ container: container.value });
   chart.options({
     autoFit: true,
     type: 'interval',

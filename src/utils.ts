@@ -1,16 +1,21 @@
-import type { IRenderer } from '@antv/g';
-
 export const GITHUB_URL = 'https://github.com/typed-sigterm/cf-comparer';
 
-export type RenderMode = 'svg' | 'canvas';
-let cachedSVGRenderer: IRenderer | undefined;
-export function getRenderer(mode: RenderMode): Promise<IRenderer | undefined> {
-  if (mode === 'svg') {
-    if (cachedSVGRenderer)
-      return Promise.resolve(cachedSVGRenderer);
-    return import('@/renderers/svg').then(
-      m => cachedSVGRenderer = new m.Renderer() as unknown as IRenderer,
-    );
-  }
-  return Promise.resolve(undefined);
+export function downloadBlob(blob: Blob, filename: string) {
+  const el = document.createElement('a');
+  el.href = URL.createObjectURL(blob);
+  el.download = filename;
+  el.click();
+  return el.href;
+}
+
+export function downloadCanvas(canvas: HTMLCanvasElement, filename: string) {
+  return new Promise<void>((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob)
+        return reject(new Error('Failed to convert canvas to blob'));
+      const url = downloadBlob(blob, filename);
+      resolve();
+      URL.revokeObjectURL(url);
+    });
+  });
 }
