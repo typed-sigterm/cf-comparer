@@ -64,7 +64,7 @@ const ratingCache = createStorage<{
 
 const CACHE_EXPIRY = 2 * 60 * 60 * 1000; // 2 hours
 
-export async function fetchRatingChanges(handle: string, retry: number, cache = true): Promise<RatingChange[]> {
+export async function fetchRatingChanges(handle: string, retry: number = 0, cache = true): Promise<RatingChange[]> {
   if (cache && await ratingCache.has(handle)) {
     const cached = (await ratingCache.get(handle))!;
     if (cached.expiresAt > Date.now())

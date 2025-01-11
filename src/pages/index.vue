@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import codeforcesLogo from '@/assets/codeforces.png?url';
+import { fetchRatingChanges } from '@/data';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -22,6 +23,11 @@ function compare(ev?: Event) {
     },
   }).finally(() => isRedirecting.value = false);
 }
+
+function prefetch(ev: Event) {
+  if (ev.target instanceof HTMLInputElement)
+    fetchRatingChanges(ev.target.value);
+}
 </script>
 
 <template>
@@ -30,7 +36,7 @@ function compare(ev?: Event) {
       <InputGroupAddon>
         <img class="cf-logo" :src="codeforcesLogo" alt="Codeforces">
       </InputGroupAddon>
-      <InputText v-model="handles[i]" placeholder="handle" />
+      <InputText v-model="handles[i]" placeholder="handle" autocorrect="false" @change="prefetch" />
       <InputGroupAddon v-if="handles.length > 1">
         <Button severity="secondary" @click="handles.splice(i, 1)">
           <template #icon>
