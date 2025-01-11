@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { RatingChange } from '@/data';
 import codeforcesLogo from '@/assets/codeforces.png?url';
-import Error from '@/components/Error.vue';
 import RatingHistory from '@/components/RatingHistory.vue';
 import { fetchRatingChanges } from '@/data';
 import { downloadCanvas } from '@/utils';
@@ -26,6 +25,7 @@ const handles = computed(() => {
 const data = ref<RatingChange[]>([]);
 const tasks: Promise<unknown>[] = ([]);
 const status = ref<'normal' | 'loading' | 'error'>('loading');
+const message = ref<string | undefined>();
 
 watch(handles, async (handles) => {
   status.value = 'loading';
@@ -41,6 +41,9 @@ watch(handles, async (handles) => {
   } catch (e) {
     console.error(e);
     status.value = 'error';
+    message.value = e instanceof Error
+      ? e.message
+      : 'Please check F12 console for more information.';
   }
 }, { immediate: true });
 
@@ -130,7 +133,7 @@ const now = new Date();
   <Error
     v-else
     title="Failed to fetch data"
-    details="Please check F12 console for more information."
+    :details="message"
   />
 </template>
 
