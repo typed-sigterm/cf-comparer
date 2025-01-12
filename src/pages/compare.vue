@@ -109,7 +109,7 @@ const now = new Date();
     <Divider />
 
     <div ref="chartContainer">
-      <h2>
+      <h2 v-if="isDownloading">
         <img :src="codeforcesLogo">
         Codeforces Rating Comparison
       </h2>
