@@ -32,31 +32,34 @@ function compare(ev?: Event) {
   }).finally(() => isRedirecting.value = false);
 }
 
-function syncRank(i: number) {
+async function syncRank(i: number) {
   if (!HANDLE_FORMAT.test(input.value[i].handle)) {
     input.value[i].status = 'error';
+    input.value[i].error = 'Invalid handle';
     return;
   }
   input.value[i].status = 'loading';
-  return fetchRatingChanges(input.value[i].handle, 3)
-    .then((r) => {
-      input.value[i].rank = inferRank(r.at(-1)!.newRating);
-      input.value[i].status = 'success';
-      input.value[i].error = undefined;
-    })
-    .catch((e) => {
-      console.error(e);
-      input.value[i].rank = undefined;
-      input.value[i].status = 'error';
-      input.value[i].error = String(e);
-    });
+  try {
+    const r = await fetchRatingChanges(input.value[i].handle, 3);
+    input.value[i].rank = inferRank(r.at(-1)!.newRating);
+    input.value[i].status = 'success';
+    input.value[i].error = undefined;
+  } catch (e) {
+    console.error(e);
+    input.value[i].rank = undefined;
+    input.value[i].status = 'error';
+    input.value[i].error = String(e);
+  }
 }
 
 function handlePaste(ev: ClipboardEvent, i: number) {
   const data = ev.clipboardData!.getData('text/plain');
-  const handles = data.split('\n').filter(Boolean);
+  const handles = data.split('\n')
+    .map(s => s.trim())
+    .filter(Boolean);
   if (handles.length < 2)
     return;
+
   // insert pasted handles
   input.value = input.value.slice(0, i + 1)
     .concat(handles.slice(1).map(handle => ({ handle })))
