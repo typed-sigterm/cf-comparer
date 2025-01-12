@@ -2,7 +2,9 @@ import PQueue from 'p-queue';
 import { createStorage } from 'unstorage';
 import IDBDriver from 'unstorage/drivers/indexedb';
 
-export const Ranks = ['Newbie', 'Pupil', 'Specialist', 'Expert', 'Candidate Master', 'Master', 'International Master', 'Grandmaster', 'International Grandmaster', 'Legendary Grandmaster', '?'] as const;
+export const HANDLE_FORMAT = /^[\w-]{3,24}$/;
+
+export const Ranks = ['Newbie', 'Pupil', 'Specialist', 'Expert', 'Candidate Master', 'Master', 'International Master', 'Grandmaster', 'International Grandmaster', 'Legendary Grandmaster', 'Tourist'] as const;
 export type Rank = typeof Ranks[number];
 export const RankRating: Record<Rank, number> = {
   'Newbie': 0,
@@ -15,20 +17,7 @@ export const RankRating: Record<Rank, number> = {
   'Grandmaster': 2400,
   'International Grandmaster': 2600,
   'Legendary Grandmaster': 2900,
-  '?': 4000,
-};
-export const RankColor: Record<Rank, string> = {
-  'Newbie': 'gray',
-  'Pupil': 'green',
-  'Specialist': 'blue',
-  'Expert': '#03A89E',
-  'Candidate Master': '#A0AA0A',
-  'Master': '#FF8C00',
-  'International Master': '#FF8C00',
-  'Grandmaster': 'red',
-  'International Grandmaster': 'red',
-  'Legendary Grandmaster': 'black',
-  '?': 'unset',
+  'Tourist': 4000,
 };
 
 export function inferRank(rating: number): Rank | undefined {
@@ -38,7 +27,7 @@ export function inferRank(rating: number): Rank | undefined {
     if (rating < RankRating[Ranks[i]])
       return Ranks[i - 1];
   }
-  return '?';
+  return 'Tourist';
 }
 
 export interface RatingChange {
@@ -64,6 +53,8 @@ const ratingCache = createStorage<{
 
 const CACHE_EXPIRY = 2 * 60 * 60 * 1000; // 2 hours
 
+export class ApiError extends Error {}
+
 export async function fetchRatingChanges(handle: string, retry: number = 0, cache = true): Promise<RatingChange[]> {
   if (cache && await ratingCache.has(handle)) {
     const cached = (await ratingCache.get(handle))!;
@@ -77,12 +68,14 @@ export async function fetchRatingChanges(handle: string, retry: number = 0, cach
     const res = await fetch(url);
     if (res.status === 429 || res.status === 503) {
       if (retry === 0)
-        throw new Error('Rate limited');
+        throw new ApiError('Rate limited');
       return fetchRatingChanges(handle, retry - 1);
     }
     const data = await res.json();
     if (data.status !== 'OK')
       throw new Error(data.comment);
+    if (!data.result.length)
+      throw new ApiError(`User ${handle} is unrated`);
     ratingCache.setItemRaw(handle, {
       expiresAt: Date.now() + CACHE_EXPIRY,
       data: data.result,

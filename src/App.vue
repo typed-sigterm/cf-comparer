@@ -1,11 +1,14 @@
 <script lang="ts" setup>
 import Header from './components/Header.vue';
+
+const online = window.navigator.onLine;
 </script>
 
 <template>
   <Header />
   <main class="m-5">
-    <RouterView />
+    <RouterView v-if="online" />
+    <Offline v-else />
   </main>
   <Toast />
 </template>
@@ -27,6 +30,10 @@ import Header from './components/Header.vue';
   flex-direction: column;
   min-height: 100vh;
   font-family: "Inter var", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+#app .p-button:disabled {
+  cursor: not-allowed;
 }
 </style>
 
