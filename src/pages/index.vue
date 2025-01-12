@@ -2,8 +2,7 @@
 import type { Rank } from '@/data';
 import codeforcesLogo from '@/assets/codeforces.png?url';
 import { fetchRatingChanges, HANDLE_FORMAT, inferRank } from '@/data';
-import { watchDebounced } from '@vueuse/core';
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -52,6 +51,21 @@ function syncRank(i: number) {
       input.value[i].error = String(e);
     });
 }
+
+function handlePaste(ev: ClipboardEvent, i: number) {
+  const data = ev.clipboardData!.getData('text/plain');
+  const handles = data.split('\n').filter(Boolean);
+  if (handles.length < 2)
+    return;
+  // insert pasted handles
+  input.value = input.value.slice(0, i + 1)
+    .concat(handles.slice(1).map(handle => ({ handle })))
+    .concat(input.value.slice(i + 1));
+  input.value[i].handle += handles[0];
+  ev.preventDefault();
+  for (let j = i; j < input.value.length; ++j)
+    syncRank(j);
+}
 </script>
 
 <template>
@@ -79,6 +93,7 @@ function syncRank(i: number) {
         @input="item.rank = undefined"
         @change="syncRank(i)"
         @blur="input[i].rank || syncRank(i)"
+        @paste="handlePaste($event, i)"
       />
       <InputGroupAddon v-if="input.length > 1">
         <Button severity="secondary" :disabled="isLoading" @click="input.splice(i, 1)">
