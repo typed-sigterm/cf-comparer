@@ -1,5 +1,5 @@
 import App from '@/App.vue';
-import Aura from '@primevue/themes/aura';
+import Aura from '@primeuix/themes/aura';
 import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
 import { createApp } from 'vue';
